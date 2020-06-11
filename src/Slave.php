@@ -2,6 +2,8 @@
 
 namespace SlaveMarket;
 
+use Decimal\Decimal;
+
 /**
  * Раб (Бедняга :-()
  *
@@ -15,7 +17,7 @@ class Slave
     /** @var string имя раба */
     protected $name;
 
-    /** @var float Стоимость раба за час работы */
+    /** @var Decimal Стоимость раба за час работы */
     protected $pricePerHour;
 
     /**
@@ -25,7 +27,7 @@ class Slave
      * @param string $name
      * @param float $pricePerHour
      */
-    public function __construct(int $id, string $name, float $pricePerHour)
+    public function __construct(int $id, string $name, Decimal $pricePerHour)
     {
         $this->id           = $id;
         $this->name         = $name;
@@ -55,9 +57,9 @@ class Slave
     /**
      * Возвращает стоимость раба за час
      *
-     * @return float
+     * @return Decimal
      */
-    public function getPricePerHour(): float
+    public function getPricePerHour(): Decimal
     {
         return $this->pricePerHour;
     }

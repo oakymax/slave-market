@@ -2,6 +2,7 @@
 
 namespace SlaveMarket\Lease;
 
+use Decimal\Decimal;
 use SlaveMarket\Master;
 use SlaveMarket\Slave;
 
@@ -18,13 +19,13 @@ class LeaseContract
     /** @var Slave Раб */
     public $slave;
 
-    /** @var float Стоимость */
+    /** @var Decimal Стоимость */
     public $price = 0;
 
     /** @var LeaseHour[] Список арендованных часов */
     public $leasedHours = [];
 
-    public function __construct(Master $master, Slave $slave, float $price, array $leasedHours)
+    public function __construct(Master $master, Slave $slave, Decimal $price, array $leasedHours)
     {
         $this->master      = $master;
         $this->slave       = $slave;

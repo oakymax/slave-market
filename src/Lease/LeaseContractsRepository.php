@@ -2,6 +2,8 @@
 
 namespace SlaveMarket\Lease;
 
+use DateTime;
+
 /**
  * Репозиторий договоров аренды
  *
@@ -13,9 +15,9 @@ interface LeaseContractsRepository
      * Возвращает список договоров аренды для раба, в которых заняты часы из указанного периода
      *
      * @param int $slaveId
-     * @param string $dateFrom Y-m-d
-     * @param string $dateTo Y-m-d
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
      * @return LeaseContract[]
      */
-    public function getForSlave(int $slaveId, string $dateFrom, string $dateTo) : array;
+    public function getForSlave(int $slaveId, DateTime $dateFrom, DateTime $dateTo) : array;
 }

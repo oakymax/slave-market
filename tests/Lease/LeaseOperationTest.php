@@ -2,6 +2,8 @@
 
 namespace SlaveMarket\Lease;
 
+use DateTime;
+use Decimal\Decimal;
 use PHPUnit\Framework\TestCase;
 use SlaveMarket\Master;
 use SlaveMarket\MastersRepository;
@@ -48,6 +50,42 @@ class LeaseOperationTest extends TestCase
     }
 
     /**
+     * Создание DateTime из строки с датой и временем
+     * (синтаксический сахар)
+     *
+     * @param string $timeString время, в формате `Y-m-d H:i:s`
+     * @return DateTime
+     */
+    private function pickTime($timeString) : DateTime
+    {
+        return DateTime::createFromFormat('Y-m-d H:i:s', $timeString);
+    }
+
+    /**
+     * Создание DateTime из строки с датой и часом (0-23)
+     * (синтаксический сахар)
+     *
+     * @param string $timeString время, в формате `Y-m-d H`
+     * @return DateTime
+     */
+    private function pickHour($timeString) : DateTime
+    {
+        return DateTime::createFromFormat('Y-m-d H', $timeString);
+    }
+
+    /**
+     * Создание DateTime из строки с датой
+     * (синтаксический сахар)
+     *
+     * @param string $timeString время, в формате `Y-m-d`
+     * @return DateTime
+     */
+    private function pickDay($timeString) : DateTime
+    {
+        return DateTime::createFromFormat('Y-m-d', $timeString);
+    }
+
+    /**
      * Если раб занят, то арендовать его не получится
      */
     public function test_periodIsBusy_failedWithOverlapInfo()
@@ -60,29 +98,30 @@ class LeaseOperationTest extends TestCase
             $masterRepo = $this->makeFakeMasterRepository($master1, $master2);
 
             // Раб
-            $slave1    = new Slave(1, 'Уродливый Фред', 20);
+            $slave1    = new Slave(1, 'Уродливый Фред', new Decimal('20', 2));
             $slaveRepo = $this->makeFakeSlaveRepository($slave1);
 
             // Договор аренды. 1й хозяин арендовал раба
-            $leaseContract1 = new LeaseContract($master1, $slave1, 80, [
-                new LeaseHour('2017-01-01 00'),
-                new LeaseHour('2017-01-01 01'),
-                new LeaseHour('2017-01-01 02'),
-                new LeaseHour('2017-01-01 03'),
+            $leaseContract1 = new LeaseContract($master1, $slave1, new Decimal('80', 2), [
+                new LeaseHour($this->pickHour('2017-01-01 00')),
+                new LeaseHour($this->pickHour('2017-01-01 01')),
+                new LeaseHour($this->pickHour('2017-01-01 02')),
+                new LeaseHour($this->pickHour('2017-01-01 03')),
             ]);
 
             // Stub репозитория договоров
             $contractsRepo = $this->prophesize(LeaseContractsRepository::class);
             $contractsRepo
-                ->getForSlave($slave1->getId(), '2017-01-01', '2017-01-01')
+                ->getForSlave($slave1->getId(), $this->pickDay('2017-01-01'), $this->pickDay('2017-01-01'))
                 ->willReturn([$leaseContract1]);
 
             // Запрос на новую аренду. 2й хозяин выбрал занятое время
-            $leaseRequest           = new LeaseRequest();
-            $leaseRequest->masterId = $master2->getId();
-            $leaseRequest->slaveId  = $slave1->getId();
-            $leaseRequest->timeFrom = '2017-01-01 01:30:00';
-            $leaseRequest->timeTo   = '2017-01-01 02:01:00';
+            $leaseRequest = new LeaseRequest(
+                $master2->getId(),
+                $slave1->getId(),
+                $this->pickTime('2017-01-01 01:30:00'),
+                $this->pickTime('2017-01-01 02:01:00')
+            );
 
             // Операция аренды
             $leaseOperation = new LeaseOperation($contractsRepo->reveal(), $masterRepo, $slaveRepo);
@@ -110,20 +149,21 @@ class LeaseOperationTest extends TestCase
             $masterRepo = $this->makeFakeMasterRepository($master1);
 
             // Раб
-            $slave1    = new Slave(1, 'Уродливый Фред', 20);
+            $slave1    = new Slave(1, 'Уродливый Фред', new Decimal('20', 2));
             $slaveRepo = $this->makeFakeSlaveRepository($slave1);
 
             $contractsRepo = $this->prophesize(LeaseContractsRepository::class);
             $contractsRepo
-                ->getForSlave($slave1->getId(), '2017-01-01', '2017-01-01')
+                ->getForSlave($slave1->getId(), $this->pickDay('2017-01-01'), $this->pickDay('2017-01-01'))
                 ->willReturn([]);
 
             // Запрос на новую аренду
-            $leaseRequest           = new LeaseRequest();
-            $leaseRequest->masterId = $master1->getId();
-            $leaseRequest->slaveId  = $slave1->getId();
-            $leaseRequest->timeFrom = '2017-01-01 01:30:00';
-            $leaseRequest->timeTo   = '2017-01-01 02:01:00';
+            $leaseRequest = new LeaseRequest(
+                $master1->getId(),
+                $slave1->getId(),
+                $this->pickTime('2017-01-01 01:30:00'),
+                $this->pickTime('2017-01-01 02:01:00')
+            );
 
             // Операция аренды
             $leaseOperation = new LeaseOperation($contractsRepo->reveal(), $masterRepo, $slaveRepo);

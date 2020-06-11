@@ -21,11 +21,11 @@ class LeaseHour
     /**
      * LeaseHour constructor.
      *
-     * @param string $dateTime Y-m-d H
+     * @param DateTime $dateTime
      */
-    public function __construct(string $dateTime)
+    public function __construct(DateTime $dateTime)
     {
-        $this->dateTime = DateTime::createFromFormat('Y-m-d H', $dateTime);
+        $this->dateTime = $dateTime;
     }
 
     /**

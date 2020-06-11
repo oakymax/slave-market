@@ -10,7 +10,7 @@ namespace SlaveMarket\Lease;
 class LeaseResponse
 {
     /** @var LeaseContract договор аренды */
-    protected $leaseContract;
+    protected $leaseContract = null;
 
     /** @var string[] список ошибок */
     protected $errors = [];
@@ -18,11 +18,11 @@ class LeaseResponse
     /**
      * Возвращает договор аренды, если аренда была успешной
      *
-     * @return LeaseContract
+     * @return LeaseContract|null
      */
     public function getLeaseContract(): ?LeaseContract
     {
-        return $this->leaseContract;
+        return $this->leaseContract ?: null;
     }
 
     /**

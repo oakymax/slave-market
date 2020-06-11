@@ -1,13 +1,15 @@
 FROM php:7.1-cli
 
 # Preparing..
-RUN apt-get update && apt-get install -y curl git
+RUN apt-get update && apt-get install -y curl git libmpdec-dev
 
 # Setup extensions
 
 # xdebug
 RUN pecl install xdebug-2.5.5 \
-    && docker-php-ext-enable xdebug
+    && docker-php-ext-enable xdebug \
+    && pecl install decimal \
+    && docker-php-ext-enable decimal
 
 # ZIP
 RUN apt-get install -y \
